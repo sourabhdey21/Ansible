@@ -1,2 +1,2 @@
 # Ansible
-Ansible  Tutorials to Manager LInux and Window Server 
+Ansible Repository for windows and linux playbooks  
