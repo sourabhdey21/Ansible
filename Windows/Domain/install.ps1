@@ -9,7 +9,7 @@ $ForestMode = "WinThreshold"
 $LogPath = "c:\windows\NTDS"
 $SysVolPath = "c:\windows\SYSVOL"
 $featureLogPath = "c:\poshlog\featurelog.txt" 
-$Password = (ConvertTo-SecureString -String "C1sc0123!" -AsPlainText -Force)
+$Password = (ConvertTo-SecureString -String "password" -AsPlainText -Force)
 #Install AD DS, DNS and GPMC 
 start-job -Name addFeature -ScriptBlock { 
 Add-WindowsFeature -Name "ad-domain-services" -IncludeAllSubFeature -IncludeManagementTools 
