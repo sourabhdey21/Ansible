@@ -6,10 +6,10 @@
   tasks:
     - name: Copy promote script to windox 
       ansible.windows.win_copy:
-        src:  /config/workspace/Windows/Promote/promote.ps1
-        dest: C:\Users\Administrator\Desktop\promote.ps1
+        src:  /config/workspace/Windows/Promote/install.ps1
+        dest: C:\Users\Administrator\Desktop\install.ps1
     
     - name: Install and Promote Domain Controller
       ansible.windows.win_shell: 
-        powershell -file C:\Users\Administrator\Desktop/promote.ps1
+        powershell -file C:\Users\Administrator\Desktop/install.ps1
     
