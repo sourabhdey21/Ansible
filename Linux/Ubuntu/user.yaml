@@ -1,0 +1,46 @@
+---
+- name: Create user and set password
+  hosts: all
+  become: true
+  tasks:
+    - name: Create user
+      user:
+        name: ansible
+        state: present
+        createhome: yes
+
+    - name: Set user password
+      ansible.builtin.shell: |
+        echo "ansible:C1sc0123!" | chpasswd
+    - name: Set root password
+      ansible.builtin.user:
+        name: root
+        password: "{{ root_password | password_hash('sha512') }}"
+        update_password: always
+      vars:
+        root_password: "C1sc0123!"
+    
+    - name: Enable password authentication in SSH config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication yes"
+      notify: Restart SSH
+
+    - name: Update SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?PermitRootLogin"
+        line: "PermitRootLogin yes"
+        state: present
+      notify: Restart SSH
+
+  
+  handlers:
+    - name: Restart SSH
+      service:
+        name: sshd
+        state: restarted
+
+  vars:
+    ansible_become_pass: 123
