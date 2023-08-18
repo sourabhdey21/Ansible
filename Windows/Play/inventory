@@ -1,0 +1,20 @@
+[windows]
+windows-svr ansible_host=203.0.1.115
+[windows:vars]
+ansible_user=Administrator
+ansible_password=C1sc0123!
+ansible_port=5986
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+
+[windows]
+windows-10 ansible_host=203.0.3.135
+[windows:vars]
+ansible_user=Administrator
+ansible_password=C1sc0123!
+ansible_port=5986
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+
