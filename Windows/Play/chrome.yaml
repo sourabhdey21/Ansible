@@ -1,0 +1,17 @@
+---
+- name: Install Google Chrome on Windows Server
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Download Chrome installer
+      win_get_url:
+        url: https://dl.google.com/chrome/install/latest/chrome_installer.exe
+        dest: C:\chrome_installer.exe
+
+    - name: Install Chrome
+      win_command: C:\chrome_installer.exe /silent /install
+
+    - name: Delete Chrome installer
+      win_file:
+        path: C:\chrome_installer.exe
+        state: absent
