@@ -1,0 +1,11 @@
+---
+- name: Enable Remote Desktop Service
+  hosts: all  # Replace with your target host or group name
+  gather_facts: yes      # Disable gathering facts to speed up the playbook
+
+  tasks:
+    - name: Enable Remote Desktop
+      win_shell: |
+        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+      become: no
