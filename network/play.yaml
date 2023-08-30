@@ -1,0 +1,76 @@
+---
+- name: Show VyOS Router Interfaces
+  hosts: vyos1
+  gather_facts: no  # We don't need Ansible facts for this example
+
+  tasks:
+    - name: Fetch interface information
+      vyos_command:
+        commands:
+          - show interfaces
+      register: interface_output
+
+    - name: Display interface information
+      debug:
+        var: interface_output.stdout_lines
+    
+    - name: set hostname for vyos1 router
+      vyos.vyos.vyos_config:
+        lines:
+        - set system host-name VyOS1
+        - set service lldp
+    - name: Configure ipv4 address for eth1
+      vyos.vyos.vyos_config:
+        lines:
+          - set interface ethernet eth1 description 'lan2 interface'
+          - set interface ethernet eth1 address 192.168.10.20/24
+      become: true
+      tags:
+        vyos ipv4 address 
+
+    - name: backup Configuration file 
+      vyos.vyos.vyos_config:
+        src: vyos.cfg
+        backup: yes
+      ignore_errors: true
+
+- name: Configure VyOS1 Router Interface
+  hosts: vyos2
+  gather_facts: yes
+
+  vars:
+    interface_name: eth1  # Replace with the actual interface name
+    new_ip_address: 192.168.9.20/24  # Replace with the desired IP address and subnet mask
+
+  tasks:
+    - name: Fetch interface information
+      vyos_command:
+        commands:
+          - show interfaces
+      register: interface_output
+
+    - name: Display interface information
+      debug:
+        var: interface_output.stdout_lines
+
+    - name: set hostname for vyos2 router
+      vyos.vyos.vyos_config:
+        lines:
+        - set system host-name vyos2
+
+    - name: Configure ipv4 address for eth1
+      vyos.vyos.vyos_config:
+        lines:
+          - set interface ethernet eth1 description 'lan2 interface'
+          - set interface ethernet eth1 address 192.168.9.20/24
+      become: true
+      tags:
+        vyos ipv4 address
+      
+    - name: Enable dns service in vyos router 
+      vyos_system:
+        cmd: "set service dns forwarding system"
+        match: "ok"
+      become: true
+      tags:
+        dns
