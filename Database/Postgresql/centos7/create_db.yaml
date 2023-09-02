@@ -1,0 +1,40 @@
+---
+- name: Create database in postgresql using ansible playbook
+  hosts: centos.example.com  # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+
+  tasks:
+    - name: Utility present
+      yum:
+        name: python-psycopg2
+        state: present
+    
+
+    - name: create database name db 
+      community.postgresql.postgresql_db:
+        state: present
+        name: ansible 
+      become: true
+      become_user: postgres
+
+- name: Create database in postgresql using ansible playbook
+  hosts: ubuntu.example.com # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+
+
+  tasks:
+    - name: utility present
+      package:
+        name: python3-psycopg2
+        state: present
+
+    - name: create database name db 
+      community.postgresql.postgresql_db:
+        state: present
+        name: ansible 
+      become: true
+      become_user: postgres
+
+  
+
+
