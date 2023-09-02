@@ -1,0 +1,23 @@
+---
+- name: Create database in postgresql using ansible playbook
+  hosts: centos.example.com  # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+  vars:
+    db_user: ansible
+    db_name: ansible 
+  
+  tasks:
+    - name: Utility present in the server 
+      package:
+        name:  python-psycopg2
+        state: present
+    
+    - name: grant db user to access the db 
+      community.postgresql.postgresql_privs:
+        type: database 
+        database: "{{ db_name }}"
+        roles: "{{ db_user }}"
+        privs: all
+        grant_option: false 
+      become: true
+      become_user: postgres
