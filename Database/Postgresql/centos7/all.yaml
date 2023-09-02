@@ -1,0 +1,67 @@
+---
+- name: Create database in postgresql using ansible playbook
+  hosts: centos.example.com  # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+  vars:
+    db_user: ansible
+    db_name: ansible
+    backup_directory: "/backups/" 
+  
+  tasks:
+    - name: Utility present in the server 
+      package:
+        name:  python-psycopg2
+        state: present
+    
+    - name: grant db user to access the db 
+      community.postgresql.postgresql_privs:
+        type: database 
+        database: "{{ db_name }}"
+        roles: "{{ db_user }}"
+        privs: all
+        grant_option: false 
+      become: true
+      become_user: postgres
+      ignore_errors: true
+
+    - name: Backup directory
+      ansible.builtin.file:
+        path: "{{ backup_directory }}"
+        mode:  0777
+        owner:  postgres
+        state:  directory
+    
+    - name: Backup database
+      community.postgresql.postgresql_db:
+        state:  dump
+        name:  "{{ db_name }}"
+        target: "{{ backup_directory }}/{{ db_name }}.gz"
+        become: true
+        become_user: ansible
+      ignore_errors: true
+    
+    - name: drop ansible database 
+      community.postgresql.postgresql_db:
+        state:  absent
+        name:  "{{ db_name }}"
+      become: true
+      become_user: postgres
+    
+    - name: create ansible database 
+      community.postgresql.postgresql_db:
+        state:  present
+        name:  "{{ db_name }}"
+      become: true
+      become_user: postgres
+    
+    - name: run query in postgerSQL 
+      community.postgresql.postgresql_query:
+        db: "{{ db_name }}"
+        query:  "SELECT version()"
+      become: true
+      become_user: postgres
+      register: sql_data
+    
+    - name: print 
+      ansible.builtin.debug:
+        var:  sql_data
