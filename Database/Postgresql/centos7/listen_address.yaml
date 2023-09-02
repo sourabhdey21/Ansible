@@ -1,0 +1,14 @@
+    - name: Configure PostgreSQL. Set listen_addresses.
+      lineinfile: dest=/var/lib/pgsql/data/postgresql.conf
+        regexp="listen_addresses =" line="listen_addresses = '*'" state=present
+      notify: restart postgresql
+      become: true
+      tags: listen_address
+
+    - name: start and enable the service 
+      service:
+        name: postgresql
+        state: restarted
+        enabled: true 
+      tags:
+        service-restart
