@@ -1,0 +1,30 @@
+---
+- name: Install PostgreSQL on CentOS 7
+  hosts: centos.example.com  # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+
+  tasks:
+    - name: Install PostgreSQL repository
+      yum:
+        name: 
+            - epel-release
+            - postgresql
+            - postgresql-server
+            - python-devel 
+            - python-psycopg2
+        state: present
+
+    - name: Check if postgresql is initialized 
+      ansible.builtin.stat:
+        path: "/var/lib/pgsql/data/pg_hba.conf"
+      register: postgres_data
+    
+    - name: Initialize postgresql
+      shell: "postgresql-setup initdb"
+      when: not postgres_data.stat.exists
+    
+    - name: start and enable the service 
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
