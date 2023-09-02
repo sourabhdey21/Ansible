@@ -1,0 +1,39 @@
+- name: Install PostgreSQL on debain like system 
+  hosts: ubuntu.example.com  # Replace with the hostname or IP address of your CentOS 7 machine
+  become: yes  # This is necessary to execute tasks with root privileges
+  vars:
+    postgresql_version: "12"
+    postgresql_bin_path: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+    postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+    ansible_ssh_pipelining: true
+
+  tasks:
+    - name: install packages 
+      apt:
+        name: 
+          - postgresql
+          - postgresql-contrib
+          - libpq-dev
+          - python3-psycopg2
+        state: present
+  
+    - name: check if postgresql initialized
+      ansible.builtin.stat:
+        path: "{{ postgresql_data_dir }}/pg_hba.conf"
+      register: postgres_data
+  
+    - name: Initialize postgresql
+      shell: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+      become: true
+      become_user: postgres
+      ignore_errors: true
+      when: not postgres_data.stat.exists
+  
+  
+    - name: start and enable the service 
+      service:
+        name: postgresql
+        state: started
+        enabled: true 
+      tags:
+        service
