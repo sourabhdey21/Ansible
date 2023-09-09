@@ -1,0 +1,32 @@
+---
+- name: Register agents in wazuh-server fedora based distributions 
+  hosts: agents-centos
+  become: yes
+  gather_facts: true
+
+  tasks:
+     - name: Download the binary 
+       shell: |
+        sudo WAZUH_MANAGER='203.0.1.178' WAZUH_AGENT_GROUP='default' WAZUH_AGENT_NAME='Centos' yum install -y https://packages.wazuh.com/4.x/yum/wazuh-agent-4.5.2-1.x86_64.rpm
+    
+     - name: Start and enable the service 
+       shell: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable wazuh-agent
+        sudo systemctl start wazuh-agent
+
+- name: Register agents in wazuh-server debian based distributions
+  hosts: agents-ubuntu
+  become: yes
+  gather_facts: true
+
+  tasks:
+     - name: Download the binary 
+       shell: |
+        curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.5.2-1_amd64.deb && sudo WAZUH_MANAGER='203.0.1.178' WAZUH_AGENT_GROUP='default' WAZUH_AGENT_NAME='Ubuntu' dpkg -i ./wazuh-agent.deb
+    
+     - name: Start and enable the service 
+       shell: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable wazuh-agent
+        sudo systemctl start wazuh-agent
