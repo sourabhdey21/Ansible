@@ -1,0 +1,70 @@
+---
+- name: Install Wazuh Server in docker containers using ansible 
+  hosts: wazuh  # Replace with the name of your target Ubuntu host or host group
+  become: yes  # Run tasks with sudo privileges
+
+  tasks:
+    - name: Update APT package cache
+      apt:
+        update_cache: yes
+
+    - name: Install packages required for Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - net-tools
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+
+    - name: Add user to docker group (to run Docker without sudo)
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 'a+x'
+
+    - name: Ensure Docker Compose is executable
+      file:
+        path: /usr/local/bin/docker-compose
+        mode: 'a+x'
+    
+    - name: Clone wazuh repository 
+      shell:
+        git clone https://github.com/wazuh/wazuh-docker.git -b v4.5.2
+    
+    - name: generate the ca-certificates
+      shell: |
+        cd /home/ubuntu/wazuh-docker/single-node
+        docker-compose -f generate-indexer-certs.yml run --rm generator
+        service ufw stop 
+    
+    - name: Pull and Start wazuh containers
+      shell: |
+        cd /home/ubuntu/wazuh-docker/single-node
+        docker-compose up -d
+      tags:
+        wazuh-server 
